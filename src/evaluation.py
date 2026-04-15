@@ -1,66 +1,8 @@
-"""
-Evaluation Logic for Access Control DAG Processing
+"""Evaluation metrics for entity extraction, relation classification, and path generation.
 
-This module contains all evaluation functions for entity extraction and
-relation classification against ground truth data.
-
-═══════════════════════════════════════════════════════════════════════════════
-
-MICRO-F1 VS MACRO-F1: CLEAR EXPLANATION
-
-Imagine you have a multi-class classification problem with 3 classes (A, B, C):
-
-MICRO-F1: "Treat all predictions equally"
-- Counts total correct/incorrect predictions across ALL classes
-- Each individual prediction has equal weight
-- Like asking: "Overall, what fraction of my predictions were right?"
-- Formula: F1 from global TP, FP, FN counts
-- Biased toward frequent classes
-
-MACRO-F1: "Treat all classes equally"
-- Calculates F1 for each class separately, then averages
-- Each class has equal weight, regardless of size
-- Like asking: "How well did I do on each class, on average?"
-- Formula: Average of per-class F1 scores
-- Fair to rare classes
-
-EXAMPLE:
-Class A: 100 samples, F1 = 0.9 (easy class)
-Class B: 10 samples, F1 = 0.5 (hard class)
-
-Micro-F1 = ~0.85 (weighted by sample count)
-Macro-F1 = 0.70 (average of 0.9 and 0.5)
-
-IN THIS CODE:
-- Per graph: MICRO-F1 (global evaluation across relation types)
-- Across graphs: MACRO-F1 (equal weight per graph)
-
-TOY EXAMPLE:
-Imagine classifying emails into 3 categories: Work, Personal, Spam
-
-Confusion Matrix:
-Work (100 emails):    TP=90, FP=5, FN=5   → F1 = 0.90
-Personal (10 emails): TP=8,  FP=1, FN=1   → F1 = 0.80
-Spam (10 emails):     TP=2,  FP=8, FN=8   → F1 = 0.22
-
-MICRO-F1 Calculation:
-Total TP = 90+8+2 = 100
-Total FP = 5+1+8 = 14
-Total FN = 5+1+8 = 14
-Precision = 100/(100+14) = 0.877
-Recall = 100/(100+14) = 0.877
-Micro-F1 = 2×0.877×0.877/(0.877+0.877) = 0.877
-# The Micro-F1 calculation uses all examples from all classes equally.
-
-MACRO-F1 Calculation:
-Macro-F1 = (0.90 + 0.80 + 0.22) / 3 = 0.64
-
-WHY DIFFERENT?
-- Micro-F1: Work emails dominate (100 samples) → score closer to Work's 0.90
-- Macro-F1: All categories equal weight → pulled down by poor Spam performance
-
-═══════════════════════════════════════════════════════════════════════════════
-
+Micro-F1: pools TP/FP/FN across all classes (biased toward frequent classes).
+Macro-F1: averages per-class F1 (gives equal weight to rare classes).
+Per-graph evaluation uses micro-F1; cross-graph aggregation uses macro-F1.
 """
 
 import csv
@@ -530,10 +472,10 @@ def _print_entity_evaluation_report(
     print("")
 
     print("Evaluation Metrics:")
-    print(".4f")
-    print(".4f")
-    print(".4f")
-    print("="*50)
+    print(f"  Precision:  {metrics.precision:.4f}")
+    print(f"  Recall:     {metrics.recall:.4f}")
+    print(f"  F1 Score:   {metrics.f1:.4f}")
+    print("=" * 50)
 
 
 # ============================================================================
@@ -930,14 +872,14 @@ def save_evaluation_report(
         report_lines.append("")
 
     report_lines.append("Classification Metrics:")
-    report_lines.append(".4f")
-    report_lines.append(".4f")
+    report_lines.append(f"   Precision:   {metrics.precision:.4f}")
+    report_lines.append(f"   Recall:      {metrics.recall:.4f}")
     if isinstance(metrics.f1, str):
         report_lines.append(f"   F1 Score:    {metrics.f1}")
     else:
-        report_lines.append(".4f")
+        report_lines.append(f"   F1 Score:    {metrics.f1:.4f}")
     if metrics.accuracy is not None:
-        report_lines.append(".4f")
+        report_lines.append(f"   Accuracy:    {metrics.accuracy:.4f}")
 
     # Create outputs directory if it doesn't exist
     from .config import PROJECT_ROOT
@@ -1328,7 +1270,7 @@ def print_aggregated_results_with_micro_macro(
     # Per-figure results
     print("📋 PER-FIGURE RESULTS:")
     print("─" * 80)
-    print("<30")
+    print(f"{'Image':<30} {'TP':>4} {'FP':>4} {'FN':>4} {'TN':>4}  {'Prec':>6} {'Rec':>6} {'F1':>6}")
     print("-" * 80)
 
     for result in evaluated_results:
@@ -1346,7 +1288,7 @@ def print_aggregated_results_with_micro_macro(
             recall = metrics.get('recall', 0)
             f1 = metrics.get('f1', 0)
 
-            print("<30")
+            print(f"{image_name:<30} {tp:>4} {fp:>4} {fn:>4} {tn:>4}  {precision:>6.3f} {recall:>6.3f} {f1:>6.3f}")
 
     print("\n" + "="*80)
 

@@ -1,20 +1,14 @@
-"""
-Command-Line Interface for Access Control DAG Processing
-
-This module provides a clean command-line interface for the Access Control
-processing system with simplified argument parsing and clear usage patterns.
-"""
+"""Command-Line Interface for Access Control DAG Processing."""
 
 import argparse
 from pathlib import Path
 from typing import Optional
 
 from .config import (
-    ProcessingConfig, APIConfig, ImageConfig, DEFAULT_INPUT_PATH, DEFAULT_OUTPUT_PATH,
+    ProcessingConfig, APIConfig, DEFAULT_INPUT_PATH, DEFAULT_OUTPUT_PATH,
     PROJECT_ROOT, DEFAULT_MODEL, SUPPORTED_VISION_MODELS
 )
 from .core_processor import AccessControlProcessor
-from .file_utils import find_ground_truth_file
 from .access_prompt import (
     generate_few_shot_examples_for_entity_extraction,
     generate_few_shot_examples_for_relation_classification,

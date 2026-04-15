@@ -1,24 +1,43 @@
-# Environment variables (contains API keys)
+# ── Secrets ──────────────────────────────────────────────
 .env
 
-# Python cache
+# ── Python ──────────────────────────────────────────────
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
+*.egg-info/
+dist/
+build/
 .Python
+*.egg
 
-# Output files
+# ── Virtual environments ────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Experiment outputs (generated at runtime) ──────────
+experiments/
 output/
-*.json
+outputs/
+logs/
+*.csv
+performance_results.csv
 
-# IDE
+# ── Datasets (user-provided, not tracked) ──────────────
+datasets/
+
+# ── IDE / Editor ────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.cursor/
 
-# OS
+# ── OS ──────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# ── Stale copies (not part of the package) ──────────────
+Untitled/

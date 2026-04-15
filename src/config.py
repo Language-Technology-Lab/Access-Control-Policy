@@ -1,9 +1,4 @@
-"""
-Configuration and Data Models for Access Control DAG Processing
-
-This module contains all configuration classes, data models, and constants
-used throughout the Access Control processing pipeline.
-"""
+"""Configuration, constants, and data models for the Access Control pipeline."""
 
 import os
 from dataclasses import dataclass, field
@@ -11,10 +6,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Union
 from pydantic import BaseModel, Field
 
-
-# ============================================================================
-# CONSTANTS
-# ============================================================================
 
 # Project root directory (parent of src/)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -40,9 +31,9 @@ VALID_FEW_SHOT_MODES = ["zero", "few"]
 VALID_RELATION_SOURCES = ["ground_truth", "predicted"]
 
 
-# ============================================================================
-# DATA MODELS
-# ============================================================================
+# ---------------------------------------------------------------------------
+# Data models
+# ---------------------------------------------------------------------------
 
 class Entity(BaseModel):
     """Represents an entity in the access control graph"""
@@ -133,9 +124,9 @@ class BatchProcessingResult:
     summary: Dict[str, Any]
 
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
 
 @dataclass
 class ProcessingConfig:
@@ -216,33 +207,9 @@ class ImageConfig:
     image_detail: str = field(default="low")  # "low" or "high" - controls vision API detail level
 
 
-# ============================================================================
-# PROMPT CONFIGURATION
-# ============================================================================
-
-@dataclass
-class PromptConfig:
-    """Configurable prompt parameters for prompt generation."""
-    node_types: Dict[str, str]          # {type_name: description}
-    relationship_types: Dict[str, str]  # {rel_name: visual_description}
-    system_prompt: str
-    few_shot_dir: Optional[str] = None
-    few_shot_base: Optional[str] = None
-    image_detail: str = "low"
-
-
-# ============================================================================
-# UTILITY FUNCTIONS
-# ============================================================================
-
-def is_level_directory(path: Path) -> bool:
-    """Check if path is a Level_X_Graphs directory"""
-    return (path.is_dir() and
-            path.name.startswith("Level_") and
-            path.name.endswith("_Graphs"))
-
-
-
+# ---------------------------------------------------------------------------
+# Utility functions
+# ---------------------------------------------------------------------------
 
 def create_output_directory(base_path: str, subdir: Optional[str] = None) -> Path:
     """Create and return output directory path"""

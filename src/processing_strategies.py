@@ -1,14 +1,4 @@
-"""
-Processing Strategies for Access Control DAG Analysis
-
-This module implements the strategy pattern for different processing methods:
-- Entity Extraction
-- Relation Classification
-- Path Enumeration
-- Relation Triples Extraction
-
-Each strategy encapsulates the logic for one specific processing method.
-"""
+"""Processing strategies (entity extraction, relation classification, path generation)."""
 
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -56,31 +46,26 @@ class ProcessingStrategy(ABC):
             Tuple of (response_text, usage_info)
         """
         model = model_override or self.api_config.model
-        try:
-            # Use max_completion_tokens (required by newer models; max_tokens is deprecated)
-            # Use temperature=1; many newer models only support this value
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=messages,
-                max_completion_tokens=self.api_config.max_tokens,
-                temperature=1,
-            )
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_completion_tokens=self.api_config.max_tokens,
+            temperature=1,
+        )
 
-            choice = response.choices[0] if response.choices else None
-            content = choice.message.content if choice and choice.message else None
-            response_text = (content if content is not None else "") or ""
-            response_text = str(response_text)
+        choice = response.choices[0] if response.choices else None
+        content = choice.message.content if choice and choice.message else None
+        response_text = (content if content is not None else "") or ""
+        response_text = str(response_text)
 
-            usage = getattr(response, "usage", None)
-            usage_info = {
-                'prompt_tokens': usage.prompt_tokens if usage else 0,
-                'completion_tokens': usage.completion_tokens if usage else 0,
-                'total_tokens': usage.total_tokens if usage else 0
-            }
+        usage = getattr(response, "usage", None)
+        usage_info = {
+            'prompt_tokens': usage.prompt_tokens if usage else 0,
+            'completion_tokens': usage.completion_tokens if usage else 0,
+            'total_tokens': usage.total_tokens if usage else 0
+        }
 
-            return response_text, usage_info
-        except Exception as e:
-            raise
+        return response_text, usage_info
 
     @abstractmethod
     def process(self, image_path: str, **kwargs) -> ProcessingResult:

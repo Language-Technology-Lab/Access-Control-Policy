@@ -1,13 +1,4 @@
-"""
-Access Control Directed Acyclic Graph (DAG) to a Knowledge Graph
-
-This module provides prompt engineering and message generation for three main approaches
-to extract knowledge graphs from Access Control DAG (Directed Acyclic Graph) images:
-
-1. Entity Extraction: Extract entities (nodes) from image
-2. Relation Classification: Binary classification of relations between two entities
-3. Path Enumeration: Extract all paths and relations in the graph
-"""
+"""Prompt engineering for entity extraction, relation classification, and path generation."""
 
 import json
 from collections import deque

@@ -1,9 +1,4 @@
-"""
-Access Control DAG Processing Package
-
-This package provides modular components for processing Access Control DAG images
-into structured knowledge graphs using vision-language models.
-"""
+"""Access Control DAG Processing — vision-LLM pipeline package."""
 
 from .config import (
     ProcessingConfig,
@@ -14,25 +9,21 @@ from .config import (
     KnowledgeGraph,
     EvaluationMetrics,
     ProcessingResult,
-    BatchProcessingResult
+    BatchProcessingResult,
 )
-
 from .core_processor import AccessControlProcessor
 from .processing_strategies import ProcessingStrategyFactory
 
 __all__ = [
-    # Configuration and models
-    'ProcessingConfig',
-    'APIConfig',
-    'ImageConfig',
-    'Entity',
-    'RelationshipResult',
-    'KnowledgeGraph',
-    'EvaluationMetrics',
-    'ProcessingResult',
-    'BatchProcessingResult',
-
-    # Core components
-    'AccessControlProcessor',
-    'ProcessingStrategyFactory',
+    "ProcessingConfig",
+    "APIConfig",
+    "ImageConfig",
+    "Entity",
+    "RelationshipResult",
+    "KnowledgeGraph",
+    "EvaluationMetrics",
+    "ProcessingResult",
+    "BatchProcessingResult",
+    "AccessControlProcessor",
+    "ProcessingStrategyFactory",
 ]

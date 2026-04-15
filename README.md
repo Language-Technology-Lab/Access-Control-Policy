@@ -1,142 +1,155 @@
-# Access Control Policy — DAG Images to Knowledge Graphs
+# Access Control Policy: DAG-to-Knowledge-Graph Extraction
 
-**Model-agnostic vision-LLM pipeline** that turns Access Control DAG images into structured knowledge-graph outputs (entities, relation classification, or end-to-end extraction) using OpenAI-compatible vision models.
+Python 3.10+ | License: MIT | Backend: OpenAI Vision API
 
-This README follows a clear, repository-first layout (similar in spirit to projects like [LogosKG](https://github.com/Serendipity618/LogosKG-Efficient-and-Scalable-Graph-Retrieval)) so you can **install → configure → run** in a few steps.
+**Access Control Policy** is a model-agnostic pipeline that converts **Access Control DAG images** into structured knowledge graphs using OpenAI-compatible vision models. Given an image of a directed acyclic graph depicting users, resources, and policies, the system extracts entities, classifies relations, or performs end-to-end graph reconstruction.
+
+### Authors & Affiliations
+
+1. **<YOUR_NAME>**, <YOUR_ORG>
+2. _(add co-authors here)_
 
 ---
 
 ## Overview
 
-- **Input:** PNG/JPEG (or folders of images) depicting access-control graphs.
-- **Output:** JSON under your chosen output directory (default layout described below).
-- **Backend:** OpenAI API (`openai` Python SDK) with optional `.env` loading via `python-dotenv`.
-
-**Entry point:** [`access_control_new.py`](access_control_new.py) → [`src/cli.py`](src/cli.py) → [`src/core_processor.py`](src/core_processor.py) → [`src/processing_strategies.py`](src/processing_strategies.py).
-
 ```mermaid
-flowchart TD
-  userInput[Input images or folder] --> entrypoint[access_control_new.py]
-  entrypoint --> cli[src/cli.py]
-  cli --> processor[src/core_processor.py]
-  processor --> strategies[src/processing_strategies.py]
-  strategies --> outputs[JSON results]
+flowchart LR
+  images["DAG images<br/>(PNG / JPEG)"] --> entry[access_control_new.py]
+  entry --> cli[src/cli.py]
+  cli --> engine[src/core_processor.py]
+  engine --> strategies[src/processing_strategies.py]
+  strategies --> openai["OpenAI Vision API"]
+  openai --> strategies
+  strategies --> output["JSON results<br/>experiments/"]
 ```
 
----
+The pipeline supports three primary modes:
 
-## Features
+| Mode (`--method`) | What it does |
+|---|---|
+| `extract_entities` | Identify **nodes** (users, objects, policy classes) from the image. |
+| `relation_classification` | **Binary** relation check for each entity pair (requires entity list). |
+| `relation_extraction` | **End-to-end:** extract nodes + edges from the image in one pass. |
 
-| Mode (`--method`) | Purpose |
-|-------------------|---------|
-| `extract_entities` | Detect graph **nodes** (entities) from the image. |
-| `relation_classification` | **Binary** relation checks using entity pairs (from ground-truth JSON or prior predictions). |
-| `relation_extraction` | **End-to-end:** nodes + edges / paths from the image (user-facing name; internally mapped to `path_generation`). |
-
-**Additional methods** (same CLI; for experiments or advanced flows): `extract_relation`, `enumerate_paths`, `path_generation`.
+Additional experimental methods (`enumerate_paths`, `path_generation`, `extract_relation`) are also available via the CLI.
 
 ---
 
-## Requirements
+## Data Format
 
-- **Python:** 3.10+ recommended (uses **Pydantic v2**).
-- **Network:** calls to OpenAI’s API.
-- **Data:** place datasets under `datasets/` if you use the default `--input` (see [Dataset layout](#dataset-layout)).
+**Input:** PNG or JPEG images of Access Control DAG graphs.  
+Images can include or exclude a legend (`--with_legend` / `--no_legend`).
+
+**Output:** JSON files containing extracted entities, classified relations, or full knowledge graphs, saved under the output directory.
+
+**Dataset layout** (when using the bundled SubgraphsWithTriples data):
+
+```
+datasets/
+  SubgraphsWithTriplesImages/        # --input points here
+    subgraphs_01/
+    subgraphs_001/
+    subgraphs_06/
+    subgraphs_01_wo_legend/
+    subgraphs_001_wo_legend/
+    subgraphs_06_wo_legend/
+  SubgraphsWithTriplesJSON/          # ground-truth (auto-resolved)
+    subgraphs_01/                    # GT for subgraphs_01 + subgraphs_01_wo_legend
+    subgraphs_001/                   # GT for subgraphs_001 + subgraphs_001_wo_legend
+    subgraphs_06/                    # GT for subgraphs_06 + subgraphs_06_wo_legend
+```
+
+> Place your own images in `datasets/` or pass an explicit `--input` path.
 
 ---
 
 ## Installation
 
-From the repository root (`Access-Control-Policy/`):
-
 ```bash
-cd /path/to/Access-Control-Policy
+git clone https://github.com/<YOUR_ORG>/Access-Control-Policy.git
+cd Access-Control-Policy
 
 python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
 
----
+**Dependencies** (see [`requirements.txt`](requirements.txt)):
 
-## Configuration (use placeholders for secrets)
-
-1. Copy the example environment file and **edit with your real key** (never commit real values):
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Open `.env` and set:
-
-   ```bash
-   OPENAI_API_KEY="<OPENAI_API_KEY>"
-   ```
-
-   Replace `<OPENAI_API_KEY>` with your actual key. For documentation or screenshots, use placeholders only:
-
-   - `<YOUR_NAME>`, `<YOUR_ORG>`, `<YOUR_EMAIL>`
-   - `<OPENAI_API_KEY>`, `<AZURE_OPENAI_API_KEY>` (if you extend the code for Azure)
-   - `<MODEL_NAME>`, `<DATASET_PATH>`, `<OUTPUT_PATH>`
-
-3. Optional: limit resize side (see [`src/config.py`](src/config.py)):
-
-   ```bash
-   MAX_IMAGE_SIDE="2048"
-   ```
+- `openai` >= 1.0
+- `pydantic` >= 2.0
+- `python-dotenv` >= 1.0
+- `Pillow` >= 10.0
 
 ---
 
-## Quick start
+## Configuration
 
-Run from the **project root** so `src/` imports resolve.
-
-**1) Entity extraction (default method, default input `datasets/`)**
+Copy the example environment file and fill in your API key:
 
 ```bash
-export OPENAI_API_KEY="<OPENAI_API_KEY>"
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```bash
+OPENAI_API_KEY="<OPENAI_API_KEY>"
+```
+
+> **Security:** `.env` is in `.gitignore`. Never commit real API keys.  
+> Use placeholders (`<OPENAI_API_KEY>`, `<YOUR_NAME>`, etc.) in documentation and pull requests.
+
+---
+
+## Quick Start
+
+### 1. Entity Extraction (default)
+
+```bash
 python access_control_new.py --method extract_entities
 ```
 
-**2) Relation classification (ground-truth entities from JSON folder)**
+### 2. Relation Classification
 
 ```bash
-export OPENAI_API_KEY="<OPENAI_API_KEY>"
 python access_control_new.py \
-  --input "<DATASET_PATH>/SubgraphsWithTriplesImages/subgraphs_01" \
-  --output "<OUTPUT_PATH>/relation_classification/subgraphs_01" \
-  --entities_input "<DATASET_PATH>/SubgraphsWithTriplesJSON/subgraphs_01" \
+  --input datasets/SubgraphsWithTriplesImages/subgraphs_01 \
+  --output experiments/relation_classification/subgraphs_01 \
+  --entities_input datasets/SubgraphsWithTriplesJSON/subgraphs_01 \
   --method relation_classification \
   --relation_source ground_truth \
-  --model gpt-5-nano \
-  --image_detail low
+  --model gpt-5-nano --image_detail low
 ```
 
-**3) End-to-end relation extraction (image → nodes + edges)**
+### 3. End-to-End Relation Extraction
 
 ```bash
-export OPENAI_API_KEY="<OPENAI_API_KEY>"
 python access_control_new.py \
-  --input "<DATASET_PATH>/SubgraphsWithTriplesImages/subgraphs_01" \
-  --output "<OUTPUT_PATH>/relation_extraction/subgraphs_01" \
+  --input datasets/SubgraphsWithTriplesImages/subgraphs_01 \
+  --output experiments/relation_extraction/subgraphs_01 \
   --method relation_extraction \
-  --model gpt-5-nano \
-  --image_detail high \
-  --few_shot zero
+  --model gpt-5-nano --image_detail high --few_shot zero
 ```
 
-**4) Images without legend**
+### 4. No-Legend Images
 
 ```bash
 python access_control_new.py \
-  --input "<DATASET_PATH>/SubgraphsWithTriplesImages/subgraphs_06_wo_legend" \
-  --output "<OUTPUT_PATH>/relation_extraction/subgraphs_06_wo_legend" \
-  --no_legend \
-  --method relation_extraction
+  --input datasets/SubgraphsWithTriplesImages/subgraphs_06_wo_legend \
+  --output experiments/relation_extraction/subgraphs_06_wo_legend \
+  --no_legend --method relation_extraction
 ```
 
-**5) Full CLI help (ground truth for options)**
+### 5. Batch Run (all datasets)
+
+```bash
+bash run_v1.sh
+```
+
+### 6. Full CLI Help
 
 ```bash
 python access_control_new.py --help
@@ -144,110 +157,84 @@ python access_control_new.py --help
 
 ---
 
-## Defaults and output paths
+## CLI Reference
 
-| Option | Default | Notes |
-|--------|---------|--------|
-| `--input` | `datasets/` (project `datasets` directory) | File or directory. |
-| `--output` | `experiments/` | For **directory** input, if you keep this default, results go under `experiments/<method>/<input_folder_name>/`. |
-| `--method` | `extract_entities` | |
-| `--few_shot` | `zero` | Use `few` for Context7-style few-shot (requires few-shot assets in repo). |
-| `--relation_source` | `ground_truth` | For `relation_classification`: `predicted` uses prior `extract_entities` outputs. |
-| `--image_detail` | `low` | `high` = higher cost/quality. |
-| `--workers` | `4` | Use `1` for sequential runs. |
-| `--model` | `gpt-5-nano` | Choices: `gpt-5-nano`, `gpt-5-mini`, `gpt-4o-mini`, `gpt-4o`. |
-
-Replace model with your chosen slug, e.g. `--model <MODEL_NAME>`.
-
----
-
-## Dataset layout
-
-If you use the **SubgraphsWithTriples** layout:
-
-**Images (`--input`):**
-
-- `datasets/SubgraphsWithTriplesImages/subgraphs_01`
-- `datasets/SubgraphsWithTriplesImages/subgraphs_001`
-- `datasets/SubgraphsWithTriplesImages/subgraphs_01_wo_legend`
-- `datasets/SubgraphsWithTriplesImages/subgraphs_001_wo_legend`
-- `datasets/SubgraphsWithTriplesImages/subgraphs_06`
-- `datasets/SubgraphsWithTriplesImages/subgraphs_06_wo_legend`
-
-**Ground-truth JSON (auto-resolved or via `--entities_input` / `--gt_input`):**
-
-- `datasets/SubgraphsWithTriplesJSON/subgraphs_01` — pairs with `subgraphs_01` and `subgraphs_01_wo_legend`
-- `datasets/SubgraphsWithTriplesJSON/subgraphs_001` — pairs with `subgraphs_001` and `subgraphs_001_wo_legend`
-- `datasets/SubgraphsWithTriplesJSON/subgraphs_06` — pairs with `subgraphs_06` and `subgraphs_06_wo_legend`
+| Argument | Default | Description |
+|---|---|---|
+| `--input` | `datasets/` | Image file or directory. |
+| `--output` | `experiments/` | Output file or directory. |
+| `--method` | `extract_entities` | Processing mode (see table above). |
+| `--model` | `gpt-5-nano` | Vision model (`gpt-5-nano`, `gpt-5-mini`, `gpt-4o-mini`, `gpt-4o`). |
+| `--image_detail` | `low` | `low` (cost-efficient, ~2.8k tokens) or `high` (~54k tokens). |
+| `--few_shot` | `zero` | `zero` or `few` (Context7-style few-shot). |
+| `--workers` | `4` | Parallel workers for batch processing (1 = sequential). |
+| `--relation_source` | `ground_truth` | Entity source for `relation_classification`: `ground_truth` or `predicted`. |
+| `--entities_input` | — | Entity folder for `relation_classification`. |
+| `--gt_input` | — | Explicit ground-truth directory for evaluation. |
+| `--with_legend` / `--no_legend` | with | Legend handling. |
+| `--subset_size` | — | Limit to N random relations per graph (testing). |
+| `--comprehensive_eval` | off | Broader evaluation across all possible relations. |
+| `--fuzzy_matching` | off | Fuzzy entity name matching in evaluation. |
 
 ---
 
-## CLI reference
+## Project Structure
 
-| Argument | Description |
-|----------|-------------|
-| `--input` | Image file or folder. |
-| `--output` | Output file (single image) or directory. |
-| `--entities_input` | For `relation_classification`: entities source folder (GT JSON dir or predicted entities dir). |
-| `--gt_input` | Optional explicit ground-truth directory for evaluation. |
-| `--with_legend` / `--no_legend` | Legend handling (default: with legend). |
-| `--method` | `extract_entities`, `relation_classification`, `relation_extraction`, `extract_relation`, `enumerate_paths`, `path_generation`. |
-| `--few_shot` | `zero` or `few`. |
-| `--relation_source` | `ground_truth` or `predicted`. |
-| `--subset_size` | Optional: limit to N random relations per graph (testing). |
-| `--comprehensive_eval` | Flag: broader evaluation mode. |
-| `--fuzzy_matching` | Flag: fuzzy entity matching in evaluation. |
-| `--image_detail` | `low` or `high`. |
-| `--workers` | Parallel workers for batch processing. |
-| `--model` | Vision model (see defaults table). |
-
----
-
-## Project structure (high level)
-
-| Path | Role |
-|------|------|
-| [`access_control_new.py`](access_control_new.py) | Main entry; can run with no args (programmatic defaults) or full CLI. |
-| [`src/cli.py`](src/cli.py) | Argument parsing and orchestration. |
-| [`src/config.py`](src/config.py) | Paths, defaults, `APIConfig` / `ProcessingConfig`. |
-| [`src/core_processor.py`](src/core_processor.py) | Batch and single-file processing. |
-| [`src/processing_strategies.py`](src/processing_strategies.py) | Vision LLM strategies. |
-| [`requirements.txt`](requirements.txt) | Python dependencies. |
-| [`.env.example`](.env.example) | Template for secrets (placeholders only). |
+```
+Access-Control-Policy/
+├── access_control_new.py        # Main entry point
+├── run_v1.sh                    # Batch runner script
+├── requirements.txt             # Python dependencies
+├── .env.example                 # API key template (placeholders only)
+├── .gitignore
+├── README.md
+└── src/                         # Core package
+    ├── __init__.py
+    ├── cli.py                   # Argument parsing and orchestration
+    ├── config.py                # Constants, data models, configuration classes
+    ├── core_processor.py        # Batch and single-file processing engine
+    ├── processing_strategies.py # Vision-LLM strategy classes
+    ├── access_prompt.py         # Prompt engineering and message builders
+    ├── entity_pair_generator.py # Entity pair generator for relation classification
+    ├── evaluation.py            # Evaluation metrics (micro/macro F1, CSV export)
+    ├── eval_metric.py           # Standalone KG evaluation (strict/relaxed)
+    └── file_utils.py            # File I/O, image encoding, JSON parsing
+```
 
 ---
 
 ## Troubleshooting
 
-- **`OpenAI API key not provided`** — Set `OPENAI_API_KEY` in `.env` or the environment (see [Configuration](#configuration-use-placeholders-for-secrets)).
-- **Import errors** — Run commands from the **repository root**; ensure `pip install -r requirements.txt` completed.
-- **Wrong output location** — For directory inputs, the CLI may rewrite `--output` when it equals the default `experiments/`; set `--output` explicitly to control the path.
+| Problem | Solution |
+|---|---|
+| `OpenAI API key not provided` | Set `OPENAI_API_KEY` in `.env` or export it in your shell. |
+| `ModuleNotFoundError: No module named 'src'` | Run from the **repository root** (`Access-Control-Policy/`). |
+| Wrong output directory | Set `--output` explicitly; the default auto-nests under `experiments/<method>/`. |
+| Truncated model responses | Increase `max_tokens` in `src/config.py` → `APIConfig`. |
 
 ---
 
-## Security
+## Security Notes
 
-- Do **not** commit `.env`, API keys, or internal dataset paths that identify individuals.
-- Use placeholders in docs, issues, and PRs: `<OPENAI_API_KEY>`, `<YOUR_NAME>`, etc.
+- **Never** commit `.env`, API keys, or paths that reveal personal information.
+- Use these placeholders in all shared docs: `<OPENAI_API_KEY>`, `<YOUR_NAME>`, `<YOUR_ORG>`, `<YOUR_EMAIL>`.
 - `.env` is listed in [`.gitignore`](.gitignore).
 
 ---
 
 ## License
 
-Add your license here (e.g. MIT). If this repository is for a paper, add a **Citation** block with your DOI or arXiv/medRxiv link.
+_Add your license here (e.g., MIT)._ See the `LICENSE` file for details.
 
 ---
 
-## Citation (optional)
-
-If you publish this work, use a BibTeX block with your real metadata (replace placeholders):
+## Citation
 
 ```bibtex
 @misc{<YOUR_CITATION_KEY>,
-  title={Your Paper Title},
-  author={<YOUR_NAME> and colleagues},
-  year={2026},
-  howpublished={\url{https://example.org/your-article}}
+  title   = {Access Control Policy: DAG-to-Knowledge-Graph Extraction},
+  author  = {<YOUR_NAME>},
+  year    = {2026},
+  url     = {https://github.com/<YOUR_ORG>/Access-Control-Policy}
 }
 ```

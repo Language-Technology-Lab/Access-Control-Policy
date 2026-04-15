@@ -1,9 +1,4 @@
-"""
-File Utilities for Access Control DAG Processing
-
-This module handles all file I/O operations, image processing, JSON parsing,
-and file discovery utilities.
-"""
+"""File I/O, image encoding, JSON parsing, and discovery utilities."""
 
 import base64
 import json

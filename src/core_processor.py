@@ -1,9 +1,4 @@
-"""
-Core Processing Engine for Access Control DAG Analysis
-
-This module provides the main processing engine that coordinates between
-different processing strategies and handles batch processing workflows.
-"""
+"""Core Processing Engine for Access Control DAG Analysis."""
 
 import random
 import time
@@ -23,7 +18,7 @@ from .file_utils import (
 )
 from .evaluation import (
     evaluate_entity_extraction, evaluate_relation_classification,
-    print_aggregated_results, print_aggregated_results_with_micro_macro,
+    print_aggregated_results_with_micro_macro,
     aggregate_evaluation_metrics, aggregate_evaluation_metrics_with_micro_macro,
     aggregate_evaluation_metrics_with_relations,
     write_evaluation_results_csv,

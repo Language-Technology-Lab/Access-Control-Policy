@@ -1,19 +1,4 @@
-"""
-Knowledge Graph Evaluation Metrics for Access Control Systems
-
-This module provides comprehensive evaluation metrics for comparing predicted knowledge graphs
-against ground truth annotations, inspired by the chemoTimelinesEval approach.
-
-Evaluation Components:
-1. Entity Extraction: Compare identified entities (users, roles, resources, policies)
-2. Assignment Relations: Compare hierarchical relationships (user->role->resource chains)
-3. Association Relations: Compare permission relationships with weights
-4. Prohibition Relations: Compare denied permissions
-
-Evaluation Modes:
-- Strict: Exact matches only
-- Relaxed: Allow partial matches and semantic equivalences
-"""
+"""Standalone KG evaluation metrics (strict / relaxed, inspired by chemoTimelinesEval)."""
 
 import json
 from typing import Dict, List, Set, Tuple, Any, Optional
