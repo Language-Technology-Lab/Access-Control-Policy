@@ -15,7 +15,7 @@ Python 3.10+ | License: MIT | Backend: OpenAI Vision API
 
 ```mermaid
 flowchart LR
-  images["DAG images<br/>(PNG / JPEG)"] --> entry[access_control_new.py]
+  images["DAG images<br/>(PNG / JPEG)"] --> entry[access_control_run.py]
   entry --> cli[src/cli.py]
   cli --> engine[src/core_processor.py]
   engine --> strategies[src/processing_strategies.py]
@@ -109,13 +109,13 @@ OPENAI_API_KEY="<OPENAI_API_KEY>"
 ### 1. Entity Extraction (default)
 
 ```bash
-python access_control_new.py --method extract_entities
+python access_control_run.py --method extract_entities
 ```
 
 ### 2. Relation Classification
 
 ```bash
-python access_control_new.py \
+python access_control_run.py \
   --input datasets/SubgraphsWithTriplesImages/subgraphs_01 \
   --output experiments/relation_classification/subgraphs_01 \
   --entities_input datasets/SubgraphsWithTriplesJSON/subgraphs_01 \
@@ -127,7 +127,7 @@ python access_control_new.py \
 ### 3. End-to-End Relation Extraction
 
 ```bash
-python access_control_new.py \
+python access_control_run.py \
   --input datasets/SubgraphsWithTriplesImages/subgraphs_01 \
   --output experiments/relation_extraction/subgraphs_01 \
   --method relation_extraction \
@@ -137,7 +137,7 @@ python access_control_new.py \
 ### 4. No-Legend Images
 
 ```bash
-python access_control_new.py \
+python access_control_run.py \
   --input datasets/SubgraphsWithTriplesImages/subgraphs_06_wo_legend \
   --output experiments/relation_extraction/subgraphs_06_wo_legend \
   --no_legend --method relation_extraction
@@ -152,7 +152,7 @@ bash run_v1.sh
 ### 6. Full CLI Help
 
 ```bash
-python access_control_new.py --help
+python access_control_run.py --help
 ```
 
 ---
@@ -182,7 +182,7 @@ python access_control_new.py --help
 
 ```
 Access-Control-Policy/
-├── access_control_new.py        # Main entry point
+├── access_control_run.py        # Main entry point
 ├── run_v1.sh                    # Batch runner script
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # API key template (placeholders only)

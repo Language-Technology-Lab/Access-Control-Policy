@@ -9,10 +9,10 @@ Setup:
     cp .env.example .env          # then fill in your OPENAI_API_KEY
 
 Usage:
-    python access_control_new.py --method extract_entities
-    python access_control_new.py --method relation_classification --entities_input <PATH>
-    python access_control_new.py --method relation_extraction --input <IMAGE_DIR> --output <OUT_DIR>
-    python access_control_new.py --help
+    python access_control_run.py --method extract_entities
+    python access_control_run.py --method relation_classification --entities_input <PATH>
+    python access_control_run.py --method relation_extraction --input <IMAGE_DIR> --output <OUT_DIR>
+    python access_control_run.py --help
 
 See README.md for full documentation.
 """

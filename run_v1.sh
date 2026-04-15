@@ -2,7 +2,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # run_v1.sh — batch relation-extraction on all 6 dataset subsets
 #
-# Runs access_control_new.py for each subset, appends one row per run to
+# Runs access_control_run.py for each subset, appends one row per run to
 # performance_results.csv, and prints the final table.
 #
 # Usage:
@@ -49,7 +49,7 @@ run_one() {
   [[ -n "$no_legend" ]] && extra+=(--no_legend)
 
   echo "▶  Running: $name ${no_legend:+(no legend)}"
-  python "$BASE_DIR/access_control_new.py" \
+  python "$BASE_DIR/access_control_run.py" \
     --input  "${BASE_IN}/${name}" \
     --output "${BASE_OUT}/${name}" \
     --gt_input "$gt_dir" \

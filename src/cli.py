@@ -29,9 +29,9 @@ Modes:
   relation_extraction    End-to-end: nodes + edges from image
 
 Examples:
-  python access_control_new.py --method extract_entities
-  python access_control_new.py --method relation_classification --entities_input /path/to/entities
-  python access_control_new.py --method relation_extraction --input graph.png --output result.json
+  python access_control_run.py --method extract_entities
+  python access_control_run.py --method relation_classification --entities_input /path/to/entities
+  python access_control_run.py --method relation_extraction --input graph.png --output result.json
         """
     )
 
